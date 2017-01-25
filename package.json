@@ -1,6 +1,6 @@
 {
   "name": "js-salsa20",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pure JavaScript Salsa20 stream cipher",
   "main": "lib/jssalsa20.min.js",
   "directories": {
@@ -31,6 +31,14 @@
     "type": "git",
     "url": "git+https://github.com/thesimj/js-salsa20.git"
   },
+  "keywords": [
+    "cryptography",
+    "cipher",
+    "encryption",
+    "stream",
+    "salsa",
+    "salsa20"
+  ],
   "author": "Mykola Bubelich",
   "license": "MIT",
   "bugs": {
