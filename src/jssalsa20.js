@@ -46,7 +46,11 @@ class JSSalsa20 {
 
   /**
    * Construct SalSa20 instance with key and nonce
+   * Key should be Uint8Array with 32 bytes
+   * None should be Uint8Array with 8 bytes
    *
+   *
+   * @throws {Error}
    * @param {Uint8Array} key
    * @param {Uint8Array} nonce
    */
@@ -81,7 +85,7 @@ class JSSalsa20 {
     this.param[7] = this._get32(nonce, 4);
 
     // set counter //
-    this.param[8] = 7;
+    this.param[8] = 0;
     this.param[9] = 0;
 
     // set key again //
@@ -90,111 +94,95 @@ class JSSalsa20 {
     this.param[13] = this._get32(key, 24);
     this.param[14] = this._get32(key, 28);
 
+    // log param
+    // this._log(this.param, "param");
+
     // init block //
     this.block = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
 
-    // generate first block //
-
+    // internal byte counter //
+    this.byteCounter = 0;
   }
 
   /**
+   *  Encrypt or Decrypt data with key and nonce
    *
    * @param {Uint8Array} data
    * @return {Uint8Array}
+   * @private
    */
-  update(data) {
+  _update(data) {
 
     if (!(data instanceof Uint8Array) || data.length === 0) {
       throw new Error("Data should be type of Uint8Array and not empty!");
     }
 
-    const output = new Array(data.length);
+    const output = new Uint8Array(data.length);
 
-    // init output array //
+    // core function, build block and xor with input data //
     for (let i = 0; i < data.length; i++) {
-      output[i] = 0;
+      if (this.byteCounter === 0 || this.byteCounter === 64) {
+        this._salsa();
+        this._counterIncrement();
+        this.byteCounter = 0;
+      }
+
+      output[i] = data[i] ^ this.block[this.byteCounter++];
     }
 
-    this._salsa();
-
-    return new Uint8Array([0]);
+    return output;
   }
 
-  _generateBlock() {
+  /**
+   *  Encrypt data with key and nonce
+   *
+   * @param {Uint8Array} data
+   * @return {Uint8Array}
+   */
+  encrypt(data) {
+    return this._update(data);
+  }
 
+  /**
+   *  Decrypt data with key and nonce
+   *
+   * @param {Uint8Array} data
+   * @return {Uint8Array}
+   */
+  decrypt(data) {
+    return this._update(data);
   }
 
   _counterIncrement() {
     // Max possible blocks is 2^64
-
-    this.param[8] = (this.param[8] + 1) & 0x7FFFFFFF;
+    this.param[8] = (this.param[8] + 1) >>> 0;
     if (this.param[8] == 0) {
-      this.param[9] = (this.param[9] + 1) & 0x7FFFFFFF;
+      this.param[9] = (this.param[9] + 1) >>> 0;
     }
   }
 
   _salsa() {
     const mix = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    let i = 0, b = 0, u;
+    let i = 0, b = 0;
 
     // copy param array to mix //
     for (i = 0; i < 16; i++) {
       mix[i] = this.param[i];
     }
 
-    let x4 = mix[4];
-
     // mix rounds //
     for (i = 0; i < this.rounds; i += 2) {
-
-      // u = mix[0] + mix[12];
-      // x4 = (x4 ^ (u << 7) | (u >> (32 - 7))) & 0xFFFFFFFF;
-      // mix[4] ^= ((u << 7) | (u >>> (32 - 7))) & 0x0FFFFFFFF;
-
-      this._quarterround(mix, 4, 0, 12, 7);
-      this._quarterround(mix, 8, 4, 0, 9);
-      this._quarterround(mix, 12, 8, 4, 13);
-      this._quarterround(mix, 0, 12, 8, 18);
-
-      this._quarterround(mix, 9, 5, 1, 7);
-      this._quarterround(mix, 13, 9, 5, 9);
-      this._quarterround(mix, 1, 13, 9, 13);
-      this._quarterround(mix, 5, 1, 13, 18);
-
-      this._quarterround(mix, 14, 10, 6, 7);
-      this._quarterround(mix, 2, 14, 10, 9);
-      this._quarterround(mix, 6, 2, 14, 13);
-      this._quarterround(mix, 10, 6, 2, 18);
-
-      this._quarterround(mix, 3, 15, 11, 7);
-      this._quarterround(mix, 7, 3, 15, 9);
-      this._quarterround(mix, 11, 7, 3, 13);
-      this._quarterround(mix, 15, 11, 7, 18);
-
-      this._quarterround(mix, 1, 0, 3, 7);
-      this._quarterround(mix, 2, 1, 0, 9);
-      this._quarterround(mix, 3, 2, 1, 13);
-      this._quarterround(mix, 0, 3, 2, 18);
-
-      this._quarterround(mix, 6, 5, 4, 7);
-      this._quarterround(mix, 7, 6, 5, 9);
-      this._quarterround(mix, 4, 7, 6, 13);
-      this._quarterround(mix, 5, 4, 7, 18);
-
-      this._quarterround(mix, 11, 10, 9, 7);
-      this._quarterround(mix, 8, 11, 10, 9);
-      this._quarterround(mix, 9, 8, 11, 13);
-      this._quarterround(mix, 10, 9, 9, 18);
-
-      this._quarterround(mix, 12, 15, 14, 7);
-      this._quarterround(mix, 13, 12, 15, 9);
-      this._quarterround(mix, 14, 13, 12, 13);
-      this._quarterround(mix, 15, 14, 13, 18);
-
-      continue;
+      this._quarter(mix, 4, 8, 12, 0);
+      this._quarter(mix, 9, 13, 1, 5);
+      this._quarter(mix, 14, 2, 6, 10);
+      this._quarter(mix, 3, 7, 11, 15);
+      this._quarter(mix, 1, 2, 3, 0);
+      this._quarter(mix, 6, 7, 4, 5);
+      this._quarter(mix, 11, 8, 9, 10);
+      this._quarter(mix, 12, 13, 14, 15);
     }
 
     for (i = 0; i < 16; i++) {
@@ -207,9 +195,12 @@ class JSSalsa20 {
       this.block[b++] = (mix[i] >>> 16) & 0xFF;
       this.block[b++] = (mix[i] >>> 24) & 0xFF;
     }
+
+    // this._log(mix, "final mix");
   }
 
   /**
+   * Salsa quarter function
    *
    * @param {[number]} data
    * @param {number} a
@@ -218,11 +209,16 @@ class JSSalsa20 {
    * @param {number} d
    * @private
    */
-  _quarterround(data, a, b, c, shift) {
-    data[a] = data[a] ^ this._rotl(data[b] + data[c], shift);
+  _quarter(data, a, b, c, d) {
+    // >>> 0 convert double to unsigned integer 32 bit
+    data[a] = (data[a] ^ this._rotl(data[d] + data[c], 7)) >>> 0;
+    data[b] = (data[b] ^ this._rotl(data[a] + data[d], 9)) >>> 0;
+    data[c] = (data[c] ^ this._rotl(data[b] + data[a], 13)) >>> 0;
+    data[d] = (data[d] ^ this._rotl(data[c] + data[b], 18)) >>> 0;
   }
 
   /**
+   * Little-endian to uint 32 bytes
    *
    * @param {Uint8Array|[number]} data
    * @param {number} index
@@ -242,22 +238,30 @@ class JSSalsa20 {
    * @private
    */
   _rotl(data, shift) {
-    return (((data << shift) | (data >> (32 - shift))) + 0x100000000) & 0xFFFFFFFF;
+    return ((data << shift) | (data >>> (32 - shift)));
+  }
+
+  /**
+   * Helper log function
+   *
+   * @param {[number]} data
+   * @param {String} message
+   * @private
+   */
+  _log(data, message = "") {
+
+    console.log("\n log: " + message);
+
+    for (let i = 0; i < data.length; i += 4) {
+      const a = ("0x00000000" + data[i].toString(16)).slice(-8);
+      const b = ("0x00000000" + data[i + 1].toString(16)).slice(-8);
+      const c = ("0x00000000" + data[i + 2].toString(16)).slice(-8);
+      const d = ("0x00000000" + data[i + 3].toString(16)).slice(-8);
+
+      console.log(a, b, c, d);
+    }
   }
 }
-
-const key = new Uint8Array([
-  1, 2, 3, 4, 5, 6, 7, 8,
-  9, 10, 11, 12, 13, 14, 15,
-  16, 17, 18, 19, 20, 21, 22,
-  23, 24, 25, 26, 27, 28, 29, 30, 21, 21
-]);
-
-const nonce = new Uint8Array([3, 1, 4, 1, 5, 9, 2, 6]);
-
-const salsa = new JSSalsa20(key, nonce);
-
-console.log(salsa.update(new Uint8Array([0x01, 0x01, 0x01, 0x01])));
 
 // EXPORT //
 if (typeof module !== "undefined" && module.exports) {
