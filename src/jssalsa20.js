@@ -32,6 +32,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
+ * General information
  * Salsa20 is a stream cipher submitted to eSTREAM by Daniel J. Bernstein.
  * It is built on a pseudorandom function based on add-rotate-xor (ARX) operations — 32-bit addition,
  * bitwise addition (XOR) and rotation operations. Salsa20 maps a 256-bit key, a 64-bit nonce,
@@ -55,11 +56,11 @@ class JSSalsa20 {
    * @param {Uint8Array} nonce
    */
   constructor(key, nonce) {
-    if (key.length !== 32) {
+    if (!(key instanceof Uint8Array) || key.length !== 32) {
       throw new Error("Key should be 32 byte array!");
     }
 
-    if (nonce.length !== 8) {
+    if (!(nonce instanceof Uint8Array) || nonce.length !== 8) {
       throw new Error("Nonce should be 8 byte array!");
     }
 
@@ -117,7 +118,7 @@ class JSSalsa20 {
   _update(data) {
 
     if (!(data instanceof Uint8Array) || data.length === 0) {
-      throw new Error("Data should be type of Uint8Array and not empty!");
+      throw new Error("Data should be type of bytes (Uint8Array) and not empty!");
     }
 
     const output = new Uint8Array(data.length);
@@ -195,8 +196,6 @@ class JSSalsa20 {
       this.block[b++] = (mix[i] >>> 16) & 0xFF;
       this.block[b++] = (mix[i] >>> 24) & 0xFF;
     }
-
-    // this._log(mix, "final mix");
   }
 
   /**
@@ -239,27 +238,6 @@ class JSSalsa20 {
    */
   _rotl(data, shift) {
     return ((data << shift) | (data >>> (32 - shift)));
-  }
-
-  /**
-   * Helper log function
-   *
-   * @param {[number]} data
-   * @param {String} message
-   * @private
-   */
-  _log(data, message = "") {
-
-    console.log("\n log: " + message);
-
-    for (let i = 0; i < data.length; i += 4) {
-      const a = ("0x00000000" + data[i].toString(16)).slice(-8);
-      const b = ("0x00000000" + data[i + 1].toString(16)).slice(-8);
-      const c = ("0x00000000" + data[i + 2].toString(16)).slice(-8);
-      const d = ("0x00000000" + data[i + 3].toString(16)).slice(-8);
-
-      console.log(a, b, c, d);
-    }
   }
 }
 
