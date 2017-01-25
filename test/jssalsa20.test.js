@@ -5,11 +5,11 @@
 
 import test from "tape";
 import JSSalsa20 from "../lib/jssalsa20.min";
+// import JSSalsa20 from "../src/jssalsa20";
 
 /**
  * General Test
  */
-
 test("Class 'JSSalsa20' should exists", tape => {
   "use strict";
 
@@ -37,7 +37,42 @@ test("Function 'decrypt' should exists", tape => {
   tape.end();
 });
 
-// Encrypt/Decrypt //
+/**
+ * Errors handlers
+ */
+test("When set key with length not 32 byte, error should be thrown", tape => {
+  "use strict";
+
+  tape.throws(() => {
+    new JSSalsa20(null, null);
+  }, /Key should be 32 byte array!/);
+
+  tape.end();
+});
+
+test("When set nonce with length not 8 byte, error should be thrown", tape => {
+  "use strict";
+
+  tape.throws(() => {
+    new JSSalsa20(new Uint8Array(32), null);
+  }, /Nonce should be 8 byte array!/);
+
+  tape.end();
+});
+
+test("When not bytes pass to encryt/decrypt method, error should be thrown", tape => {
+  "use strict";
+
+  tape.throws(() => {
+    new JSSalsa20(new Uint8Array(32), new Uint8Array(8)).encrypt(null);
+  }, /Data should be type of bytes \(Uint8Array\) and not empty!/);
+
+  tape.end();
+});
+
+/**
+ * Encrypt / Decrypt
+ */
 test("Encrypt and decrypt for 256 byte should be same", tape => {
   "use strict";
 
@@ -95,7 +130,6 @@ test("First block and param should be equal to reference", tape => {
   tape.deepEqual(instance.block, exp_block, "Block should be the same as in design");
 
   tape.end();
-
 });
 
 
