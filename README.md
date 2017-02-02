@@ -1,6 +1,9 @@
 # JS-Salsa20
 Pure JavaScript Salsa20 stream cipher
 
+[![Build Status](https://travis-ci.org/thesimj/js-salsa20.svg?branch=master)](https://travis-ci.org/thesimj/js-salsa20)
+[![Standard - JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](http://standardjs.com/)
+
 ### Abstract
 Salsa20 is a family of 256-bit stream ciphers designed in 2005
 and submitted to eSTREAM, the ECRYPT Stream Cipher Project.
