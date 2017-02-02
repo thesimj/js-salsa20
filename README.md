@@ -9,6 +9,12 @@ changes. The 20-round stream cipher Salsa20/20 is consistently faster
 than AES and is recommended by the designer for typical cryptographic
 applications.
 
+### Implementation derived from 
+- https://cr.yp.to/snuffle/salsa20/ref/salsa20.c
+- [The Salsa20 family of stream ciphers](https://cr.yp.to/snuffle/salsafamily-20071225.pdf)
+- [Salsa20 specification](https://cr.yp.to/snuffle/spec.pdf)
+- [Salsa20 design](https://cr.yp.to/snuffle/design.pdf)
+
 ### Install
 ```
 npm install js-salsa20 --save

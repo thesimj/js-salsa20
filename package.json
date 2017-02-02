@@ -1,12 +1,11 @@
 {
   "name": "js-salsa20",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Pure JavaScript Salsa20 stream cipher",
-  "main": "lib/jssalsa20.min.js",
+  "main": "src/jssalsa20.js",
   "directories": {
     "test": "test",
-    "src": "src",
-    "lib": "lib"
+    "src": "src"
   },
   "devDependencies": {
     "babel-eslint": "^7.1.1",
@@ -15,17 +14,16 @@
     "babel-preset-env": "^1.1.8",
     "babel-preset-es2015": "^6.18.0",
     "babili": "^0.0.10",
-    "cross-env": "^3.1.4",
     "eslint": "^3.13.1",
+    "standard": "^8.6.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3",
     "tape-watch": "^2.2.4"
   },
   "scripts": {
-    "prod": "npm run build && cross-env BABEL_ENV=production babel ./src/jssalsa20.js --out-file ./lib/jssalsa20.min.js",
-    "build": "babel ./src/jssalsa20.js --out-file ./lib/jssalsa20.js --source-maps inline",
     "test": "tape -r babel-register test/**/*.test.js | tap-spec",
-    "watch": "tape-watch test/**/*.test.js -r babel-register -p tap-spec"
+    "watch": "tape-watch test/**/*.test.js -r babel-register -p tap-spec",
+    "lint": "standard ./src/jssalsa20.js"
   },
   "repository": {
     "type": "git",

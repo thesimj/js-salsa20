@@ -5,24 +5,9 @@
     "es6": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "extends": "standard",
   "parserOptions": {
-    "ecmaVersion": 7,
+    "ecmaVersion": 6,
     "sourceType": "module"
-  },
-  "rules": {
-    "indent": 0,
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "double"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ]
   }
 }
